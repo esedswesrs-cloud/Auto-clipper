@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AUTO CLIPPER — Potong Video Jadi Klip Viral</title>
+<style>
+  :root{
+    --bg:#0b0f14; --panel:#121a22; --panel2:#0e151c; --line:#1e2c38;
+    --txt:#e8f4f8; --dim:#8fb3c1; --accent:#22d3ee; --accent2:#0ea5c6;
+    --accent-soft:#7ef0ff; --on-accent:#06222a; --deep:#05090c;
+    --ok:#34d399; --err:#f87171;
+  }
+  /* ---------- v1.13: tema ---------- */
+  html[data-theme="terang"]{
+    --bg:#eef3f6; --panel:#ffffff; --panel2:#e9f0f4; --line:#d3dde3;
+    --txt:#15222b; --dim:#5b7280; --accent:#0891b2; --accent2:#0e7490;
+    --accent-soft:#67e8f9; --on-accent:#ffffff; --deep:#dfe9ee;
+    --ok:#059669; --err:#dc2626;
+  }
+  html[data-theme="ungu"]{
+    --bg:#0e0a14; --panel:#181228; --panel2:#120e1f; --line:#2b2142;
+    --txt:#f1eafc; --dim:#a89cc9; --accent:#a78bfa; --accent2:#8b5cf6;
+    --accent-soft:#ddd6fe; --on-accent:#1e1040; --deep:#08060f;
+    --ok:#34d399; --err:#f87171;
+  }
+  html[data-theme="emas"]{
+    --bg:#100d08; --panel:#1d1811; --panel2:#151009; --line:#352a1a;
+    --txt:#f8f1e2; --dim:#bfa77e; --accent:#fbbf24; --accent2:#d97706;
+    --accent-soft:#fde68a; --on-accent:#2a1c05; --deep:#070503;
+    --ok:#34d399; --err:#f87171;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--txt);
+    font-family:'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height:100vh; padding:16px;
+  }
+  .wrap{max-width:760px; margin:0 auto;}
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 2px 18px;
+  }
+  .logo{
+    font-size:clamp(24px, 6vw, 36px); font-weight:900; letter-spacing:1px;
+    background:linear-gradient(90deg, var(--accent), var(--accent-soft), var(--accent));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .logo small{display:block; font-size:12px; letter-spacing:2px; color:var(--dim);
+    -webkit-text-fill-color:var(--dim); font-weight:600;}
+  .icon-btn{
+    background:var(--panel); border:1px solid var(--line); color:var(--txt);
+    width:44px; height:44px; border-radius:12px; font-size:20px; cursor:pointer;
+  }
+  .icon-btn:active{transform:scale(.95);}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:18px; margin-bottom:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.28);
+  }
+  /* panel lipat pengaturan lanjutan */
+  .adv{
+    border:1px solid var(--line); background:var(--panel2);
+    border-radius:14px; padding:14px; margin:16px 0 6px;
+  }
+  .adv summary{
+    font-weight:800; font-size:14px; cursor:pointer; color:var(--txt);
+    list-style:none; outline:none;
+  }
+  .adv summary::-webkit-details-marker{display:none;}
+  .adv summary::after{content:"  ▾"; color:var(--accent);}
+  .adv[open] summary::after{content:"  ▴";}
+  .step-title{
+    font-size:13px; font-weight:800; letter-spacing:2px; color:var(--accent);
+    margin-bottom:12px; text-transform:uppercase; line-height:1.4;
+  }
+  label{display:block; font-size:13px; color:var(--dim); margin:12px 0 6px;}
+  label:first-of-type{margin-top:0;}
+  /* label di bawah pil sumber: jangan nempel ke tombol di atasnya —
+     :first-of-type di atas membuat margin-atasnya 0 */
+  #urlPanel label, #filePanel label{margin-top:12px;}
+  input[type=text], input[type=url], input[type=number], input[type=password]{
+    width:100%; background:var(--panel2); border:1px solid var(--line);
+    border-radius:10px; color:var(--txt); padding:12px; font-size:16px;
+  }
+  input:focus{outline:none; border-color:var(--accent);}
+  .row{display:flex; gap:10px;}
+  .row > *{flex:1;}
+  .paste-btn{
+    flex:0 0 auto; background:var(--panel2); border:1px solid var(--line);
+    color:var(--accent); border-radius:10px; padding:0 16px; font-size:15px;
+    cursor:pointer; font-weight:700;
+  }
+  .pills{display:flex; gap:8px; flex-wrap:wrap;}
+  .pill{
+    border:1px solid var(--line); background:var(--panel2); color:var(--dim);
+    padding:10px 14px; border-radius:999px; cursor:pointer; font-size:14px;
+    font-weight:600; user-select:none; text-align:center;
+    transition:border-color .15s, background .15s;
+  }
+  .pill.on{border-color:var(--accent); color:var(--on-accent); background:var(--accent);}
+  .tpl-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  .tpl-card{
+    border:2px solid var(--line); background:var(--panel2); border-radius:14px;
+    padding:6px; cursor:pointer; text-align:center; transition:border-color .15s;
+  }
+  .tpl-card.on{border-color:var(--accent);}
+  .tpl-card video{
+    width:100%; aspect-ratio:9/16; object-fit:cover; border-radius:9px;
+    display:block; background:#000;
+  }
+  .tpl-name{font-size:13px; font-weight:700; color:var(--txt); margin-top:7px;}
+  .tpl-desc{font-size:11px; color:var(--dim); margin:2px 0 4px; line-height:1.35;}
+  .switch-row{display:flex; align-items:center; justify-content:space-between;
+    padding:10px 0 2px;}
+  .switch-row span{font-size:14px; color:var(--txt);}
+  .switch{position:relative; width:50px; height:28px; flex:0 0 auto;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{position:absolute; inset:0; background:var(--panel2);
+    border:1px solid var(--line); border-radius:999px; cursor:pointer;
+    transition:.2s;}
+  .slider:before{content:""; position:absolute; width:20px; height:20px;
+    left:3px; top:3px; border-radius:50%; background:var(--dim); transition:.2s;}
+  .switch input:checked + .slider{background:var(--accent2); border-color:var(--accent);}
+  .switch input:checked + .slider:before{transform:translateX(22px); background:#fff;}
+  #processBtn{
+    width:100%; margin-top:18px; padding:16px; border:none; border-radius:14px;
+    background:linear-gradient(180deg, var(--accent), var(--accent2));
+    color:var(--on-accent); font-size:19px; font-weight:900; letter-spacing:3px;
+    cursor:pointer;
+  }
+  #processBtn:disabled{opacity:.55; cursor:not-allowed;}
+  .bar{
+    height:14px; background:var(--panel2); border:1px solid var(--line);
+    border-radius:999px; overflow:hidden; margin:8px 0 12px;
+  }
+  .bar > div{
+    height:100%; width:0%;
+    background:linear-gradient(90deg, var(--accent2), var(--accent));
+    transition:width .5s ease;
+  }
+  #logBox{
+    background:var(--deep); border:1px solid var(--line); border-radius:10px;
+    padding:12px; font-family:ui-monospace, monospace; font-size:12.5px;
+    color:var(--dim); max-height:180px; overflow-y:auto; white-space:pre-wrap;
+    line-height:1.55;
+  }
+  .hidden{display:none !important;}
+  .clips{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:14px;}
+  .clip-card{background:var(--panel2); border:1px solid var(--line);
+    border-radius:14px; overflow:hidden;}
+  .clip-card video{width:100%; display:block; background:#000; max-height:340px;}
+  .clip-body{padding:12px;}
+  .clip-hook{font-weight:700; font-size:14.5px; margin-bottom:6px;}
+  .clip-meta{font-size:12.5px; color:var(--dim); margin-bottom:10px;}
+  .dl-btn{
+    display:block; text-align:center; background:var(--accent); color:var(--on-accent);
+    text-decoration:none; font-weight:800; padding:11px; border-radius:10px;
+    font-size:15px;
+  }
+  .err{color:var(--err); font-weight:700; padding:8px 0;}
+  footer{text-align:center; color:var(--dim); font-size:12.5px; padding:14px 0 8px;}
+  .badge{border:1px solid var(--line); border-radius:999px; padding:3px 10px;}
+  /* modal */
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(0,0,0,.65);
+    display:flex; align-items:center; justify-content:center; z-index:50;
+    padding:16px;
+  }
+  .modal{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px;
+    padding:20px; width:100%; max-width:440px;
+  }
+  .modal h3{margin-bottom:6px; font-size:17px;}
+  .modal .save-btn{
+    width:100%; margin-top:16px; padding:13px; border:none; border-radius:10px;
+    background:var(--accent); color:var(--on-accent); font-weight:800; font-size:15px;
+    cursor:pointer;
+  }
+  .hint{font-size:12px; color:var(--dim); margin-top:6px; line-height:1.5;}
+  select{
+    width:100%; background:var(--panel2); border:1px solid var(--line);
+    border-radius:10px; color:var(--txt); padding:12px; font-size:16px;
+  }
+  input[type=file]{
+    width:100%; background:var(--panel2); border:1px solid var(--line);
+    border-radius:10px; color:var(--dim); padding:10px; font-size:14px;
+  }
+  input[type=color]{
+    width:100%; height:44px; background:var(--panel2);
+    border:1px solid var(--line); border-radius:10px; padding:4px;
+  }
+  .det-card{
+    background:var(--panel2); border:1px solid var(--line);
+    border-radius:12px; padding:10px 12px; margin-top:8px;
+  }
+  .det-card label{margin:0; color:var(--txt); font-size:14px;}
+  .det-card .hint{margin-top:4px;}
+  .copy-btn{
+    background:var(--panel); border:1px solid var(--line); color:var(--accent);
+    border-radius:8px; padding:8px 12px; font-size:13px; font-weight:700;
+    cursor:pointer; margin-top:8px;
+  }
+  .clip-title{font-weight:800; font-size:15px; margin-bottom:4px;}
+  .clip-desc{font-size:12.5px; color:var(--dim); margin-bottom:8px; line-height:1.45;}
+  /* ---------- v1.12: metadata posting & upload ---------- */
+  textarea{width:100%; background:var(--panel2); border:1px solid var(--line);
+    border-radius:10px; color:var(--txt); padding:12px; font-size:14px;
+    min-height:110px; resize:vertical; font-family:inherit; line-height:1.5;}
+  .file-chip{background:var(--panel2); border:1px solid var(--line);
+    border-radius:10px; padding:10px 12px; font-size:13.5px; margin-top:8px;
+    display:flex; justify-content:space-between; gap:8px; align-items:center;}
+  .meta-block{margin-top:10px; border-top:1px solid var(--line); padding-top:10px;}
+  .meta-field{margin-bottom:10px;}
+  .meta-label{font-size:11px; letter-spacing:1px; color:var(--dim);
+    font-weight:700; margin-bottom:4px;}
+  .meta-value{background:var(--deep); border:1px solid var(--line);
+    border-radius:8px; padding:9px 10px; font-size:13px; line-height:1.5;
+    white-space:pre-wrap; word-break:break-word;}
+  .meta-copy{background:var(--panel); border:1px solid var(--line);
+    color:var(--accent); border-radius:8px; padding:6px 10px; font-size:12px;
+    font-weight:700; cursor:pointer; margin-top:5px;}
+  /* ---------- v1.21: percikan saat maskot pindah tempat ---------- */
+  #sparkles{position:fixed; inset:0; z-index:39;
+    pointer-events:none; overflow:hidden;}
+  .spark{position:absolute; color:var(--accent); line-height:1;
+    animation:sparklePop .9s ease-out forwards;
+    text-shadow:0 0 6px var(--accent);}
+  @keyframes sparklePop{
+    0%{transform:translate(-50%,-50%) scale(0) rotate(0deg); opacity:0;}
+    25%{opacity:1;}
+    100%{transform:translate(-50%,-70px) scale(1.1) rotate(90deg); opacity:0;}
+  }
+
+  /* v1.22: gunting motong — dua sisi membuka-menutup di poros
+     v1.23: sudut diperbesar jadi ±14° biar gerakannya kelihatan */
+  #mascot .sc-side1, #mascot .sc-side2{
+    transform-box:view-box; transform-origin:50px 56px;
+    animation:snip .8s ease-in-out infinite alternate;}
+  #mascot .sc-side2{animation-name:snip2;}
+  @keyframes snip{from{transform:rotate(-14deg);} to{transform:rotate(14deg);}}
+  @keyframes snip2{from{transform:rotate(14deg);} to{transform:rotate(-14deg);}}
+
+  /* v1.22: clapper menepuk — flap membuka-menutup berkala;
+     pas "liatin", flap menutup rapat (kayak mata tertutup)
+     v1.23: siklus 3 dtk, flap menutup lebih lama (60–80%) biar
+     tepukannya gampang ketangkap kamera */
+  #mascot .cl-flap{
+    transform-box:view-box; transform-origin:14px 24px;
+    animation:clap 3s ease-in-out infinite;}
+  @keyframes clap{
+    0%,50%{transform:rotate(-24deg);}
+    60%,80%{transform:rotate(0deg);}
+    90%,100%{transform:rotate(-24deg);}
+  }
+  #mascot.watching .cl-flap{animation:none; transform:rotate(0deg);}
+
+  /* ---------- v1.14: maskot hantu melayang ---------- */
+  #mascot{position:fixed; right:14px; bottom:14px; z-index:40;
+    pointer-events:none; line-height:0;
+    filter:drop-shadow(0 6px 10px rgba(0,0,0,.35));
+    transition:left 2.8s ease-in-out, top 2.8s ease-in-out;}
+  #mascot svg{display:block; width:64px; height:64px;}
+  #mascot svg.hidden{display:none;}
+  #mascot .m-bob{animation:mascotFloat 3.2s ease-in-out infinite;}
+  @keyframes mascotFloat{
+    0%,100%{transform:translateY(0) rotate(-2deg);}
+    50%{transform:translateY(-14px) rotate(2deg);}
+  }
+  /* v1.16: pas mode Manual / Pengaturan dibuka, hantu berhenti
+     terbang, lalu "liatin" (matanya menengok ke atas)
+     v1.17: liatinnya sambil TUTUP MATA (malu-malu) — mata jadi
+     garis tipis, pupil hilang
+     v1.19: muter 360° DIHAPUS (user: jangan muter kek bola) —
+     hantu selalu tegak lurus, cuma melayang + terbang
+     v1.23: mata tertutup kini GARIS LENGKUNG yang jelas
+     (bukan garis tipis nyaris tak terlihat) */
+  #mascot .m-closed{display:none;}
+  #mascot.watching .m-eye{opacity:0;}
+  #mascot.watching .m-closed{display:block;}
+  @media (prefers-reduced-motion:reduce){
+    #mascot .m-bob, #mascot .sc-side1, #mascot .sc-side2,
+    #mascot .cl-flap{animation:none;}
+  }
+  /* ---------- tampilan HP ---------- */
+  html, body{overflow-x:hidden;}
+  video, img{max-width:100%;}
+  .modal{max-height:92vh; overflow-y:auto;}
+  /* editor crop visual */
+  .crop-stage{
+    position:relative; width:100%; aspect-ratio:16/9; overflow:hidden;
+    background:var(--panel2); border:1px solid var(--line); border-radius:12px;
+    margin:8px 0 8px;
+  }
+  .crop-stage img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  }
+  .crop-empty{
+    position:absolute; inset:0; display:flex; align-items:center;
+    justify-content:center; text-align:center; padding:18px;
+    color:var(--dim); font-size:13px; line-height:1.5;
+  }
+  .crop-box{
+    position:absolute; border:2px solid var(--accent); border-radius:3px;
+    background:rgba(34,211,238,.14);
+    box-shadow:0 0 0 9999px rgba(0,0,0,.45);
+    cursor:grab; touch-action:none;
+  }
+  .crop-box.end{border-color:#fb923c; background:rgba(251,146,60,.14);}
+  .crop-box:active{cursor:grabbing;}
+  .cb-tag{
+    position:absolute; top:-19px; left:-2px; font-size:10px; font-weight:800;
+    background:var(--accent); color:var(--on-accent); padding:1px 6px; border-radius:4px;
+    white-space:nowrap;
+  }
+  .crop-box.end .cb-tag{background:#fb923c; color:#2a1200;}
+  .cb-handle{
+    position:absolute; right:6px; bottom:6px; width:26px; height:26px;
+    background:var(--accent); border:2px solid #fff; border-radius:50%;
+    cursor:nwse-resize; touch-action:none; z-index:3;
+  }
+  .crop-readout{font-size:12.5px; color:var(--dim); margin:2px 0 10px;}
+  .crop-readout b{color:var(--txt);}
+  .mini-btn{
+    border:1px solid var(--accent); background:transparent; color:var(--accent);
+    padding:10px 12px; border-radius:10px; cursor:pointer; font-size:13px;
+    font-weight:700; flex:1 1 0;
+  }
+  @media (max-width: 640px){
+    body{padding:10px;}
+    .wrap{max-width:100%;}
+    header{padding:4px 0 10px;}
+    .logo{font-size:24px;}
+    .logo small{font-size:10.5px; letter-spacing:1.5px;}
+    .icon-btn{width:40px; height:40px; border-radius:11px; font-size:18px;}
+    .card{padding:12px; border-radius:12px; margin-bottom:10px;
+      box-shadow:0 4px 16px rgba(0,0,0,.22);}
+    .step-title{font-size:11.5px; letter-spacing:1.5px; margin-bottom:8px;}
+    label{font-size:12.5px; margin:10px 0 5px;}
+    /* baris URL: kembali sejajar seperti semula — input + tombol Tempel */
+    .url-row{flex-direction:row; gap:8px;}
+    .url-row input{padding:10px 12px; border-radius:9px;}
+    .url-row .paste-btn{flex:0 0 auto; padding:0 14px; width:auto;
+      border-radius:9px; font-size:14px; white-space:nowrap;}
+    /* pil jadi grid 2 kolom: rapi, tidak berantakan */
+    .pills{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+    .pill{padding:9px 6px; font-size:13px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    /* baris angka: kolom sama lebar */
+    .row{flex-wrap:wrap; gap:8px;}
+    .row > *{flex:1 1 0; min-width:0;}
+    .row label{font-size:11px; white-space:nowrap; overflow:hidden;
+      text-overflow:ellipsis;}
+    input[type=text], input[type=url], input[type=number],
+    input[type=password], select{font-size:16px; padding:10px 11px;}
+    /* kartu template: preview pendek, bukan kotak besar */
+    .tpl-grid{gap:8px;}
+    .tpl-card{padding:4px; border-radius:11px;}
+    .tpl-card video{aspect-ratio:auto; height:148px;}
+    .tpl-name{font-size:11.5px; margin-top:5px;}
+    .tpl-desc{display:none;}
+    .switch-row{padding:8px 0 2px;}
+    .switch-row span{font-size:13.5px; padding-right:10px;}
+    .adv{padding:10px; border-radius:12px;}
+    #processBtn{font-size:16px; padding:14px; margin-top:14px;
+      letter-spacing:2px;
+      box-shadow:0 6px 20px rgba(34,211,238,.25);}
+    .clips{grid-template-columns:1fr 1fr; gap:10px;}
+    .clip-card video{max-height:230px;}
+    .clip-body{padding:8px;}
+    .clip-hook{font-size:13px;}
+    .clip-title{font-size:13.5px;}
+    .dl-btn{padding:10px; font-size:14px;}
+    #logBox{font-size:11.5px; max-height:150px;}
+    footer{font-size:11.5px; padding:10px 0 6px;}
+  }
+  @media (max-width: 380px){
+    .clips{grid-template-columns:1fr;}
+    .tpl-card video{height:132px;}
+    .row > *{flex:1 1 84px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">AUTO CLIPPER<small>POTONG VIDEO JADI KLIP VIRAL</small></div>
+    <div style="display:flex; gap:8px;">
+      <button class="icon-btn" id="themeBtn" title="Ganti tema">🎨</button>
+      <button class="icon-btn" id="settingsBtn" title="Pengaturan">⚙️</button>
+    </div>
+  </header>
+
+  <!-- STEP 1 -->
+  <section class="card">
+    <div class="step-title">Step 1 — Sumber Video</div>
+    <div class="pills" id="sourcePills">
+      <div class="pill on" data-source="url">🔗 Link</div>
+      <div class="pill" data-source="file">📁 Upload file</div>
+    </div>
+    <div id="urlPanel">
+      <label for="urlInput">Tempel link YouTube, Facebook, TikTok, atau Instagram</label>
+      <div class="row url-row">
+        <input type="url" id="urlInput" placeholder="https://www.youtube.com/watch?v=... atau link Facebook / TikTok / Instagram">
+        <button class="paste-btn" id="pasteBtn" type="button">Tempel</button>
+      </div>
+    </div>
+    <div id="filePanel" class="hidden">
+      <label for="videoFile">Pilih file video dari HP/PC (maks 1 GB)</label>
+      <input type="file" id="videoFile" accept="video/*,.mkv,.mov,.avi,.webm,.mp4,.m4v">
+      <div id="uploadChip" class="hint"></div>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="card">
+    <div class="step-title">Step 2 — Pengaturan</div>
+    <label>Mode pilih klip</label>
+    <div class="pills" id="modePills">
+      <div class="pill on" data-mode="auto">Auto (AI/heatmap)</div>
+      <div class="pill" data-mode="manual">Manual</div>
+      <div class="pill" data-mode="manual_ai">Manual + AI</div>
+    </div>
+    <div id="manualPanel" class="hidden">
+      <label>Klip manual — isi detik mulai &amp; selesai, lalu tambah</label>
+      <div class="row">
+        <div>
+          <label for="manStart">Mulai (detik)</label>
+          <input type="number" id="manStart" value="0" min="0">
+        </div>
+        <div>
+          <label for="manEnd">Selesai (detik)</label>
+          <input type="number" id="manEnd" value="30" min="1">
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button class="paste-btn" id="addClipBtn" type="button" style="width:100%;padding:12px;">+ Tambah</button>
+        </div>
+      </div>
+      <div id="manualList" class="hint">Belum ada klip manual.</div>
+    </div>
+    <div id="detectPanel" class="hidden">
+      <label>Manual + AI — deteksi dulu momennya, centang yang mau di-render</label>
+      <button class="paste-btn" id="detectBtn" type="button" style="width:100%;padding:12px;">🔍 Deteksi momen</button>
+      <div id="detectList"></div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="clipCount">Jumlah klip</label>
+        <input type="number" id="clipCount" value="5" min="1" max="20">
+      </div>
+      <div>
+        <label for="minDur">Durasi min (detik)</label>
+        <input type="number" id="minDur" value="15" min="3" max="120">
+      </div>
+      <div>
+        <label for="maxDur">Durasi maks (detik)</label>
+        <input type="number" id="maxDur" value="30" min="5" max="180">
+      </div>
+    </div>
+    <label>Rasio video</label>
+    <div class="pills" id="ratioPills">
+      <div class="pill on" data-ratio="9:16">9:16 Shorts/Reels</div>
+      <div class="pill" data-ratio="9:16-blur">9:16 Latar Blur</div>
+      <div class="pill" data-ratio="16:9">16:9 Biasa</div>
+      <div class="pill" data-ratio="1:1">1:1 Kotak</div>
+    </div>
+    <label>Resolusi</label>
+    <div class="pills" id="heightPills">
+      <div class="pill" data-height="480">480p</div>
+      <div class="pill on" data-height="720">720p</div>
+      <div class="pill" data-height="1080">1080p</div>
+    </div>
+    <label for="audience">Target penonton (opsional)</label>
+    <input type="text" id="audience" placeholder="mis. penggemar politik, gamer, ibu rumah tangga">
+    <div class="switch-row">
+      <span>Teaser teks (hook di awal klip)</span>
+      <label class="switch">
+        <input type="checkbox" id="teaserToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <div>
+        <label for="teaserSeconds">Durasi teaser (detik)</label>
+        <input type="number" id="teaserSeconds" value="3" min="1" max="10">
+      </div>
+      <div></div>
+    </div>
+    <div class="switch-row">
+      <span>Hanya skor tinggi</span>
+      <label class="switch">
+        <input type="checkbox" id="highToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="switch-row">
+      <span>Caption viral (teks per kata menyala, dari suara video)</span>
+      <label class="switch">
+        <input type="checkbox" id="captionToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <label>Template caption — klik buat milih, contohnya jalan sendiri</label>
+    <div class="tpl-grid" id="captionTplGrid">
+      <div class="tpl-card on" data-cstyle="pop">
+        <video src="cap-pop.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <div class="tpl-name">🔥 Pop Kuning</div>
+        <div class="tpl-desc">Kata aktif menyala kuning, paling viral</div>
+      </div>
+      <div class="tpl-card" data-cstyle="klasik">
+        <video src="cap-klasik.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <div class="tpl-name">Putih Tebal</div>
+        <div class="tpl-desc">Bersih &amp; aman buat semua konten</div>
+      </div>
+      <div class="tpl-card" data-cstyle="kotak">
+        <video src="cap-kotak.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <div class="tpl-name">Kotak Hitam</div>
+        <div class="tpl-desc">Latar kotak gelap, teks selalu kebaca</div>
+      </div>
+    </div>
+    <details class="adv">
+    <summary>⚙️ Pengaturan lanjutan</summary>
+    <label for="langSelect">Bahasa transkripsi</label>
+    <select id="langSelect">
+      <option value="auto">Auto-detect (disarankan)</option>
+      <option value="id">Indonesia</option>
+      <option value="en">English</option>
+      <option value="ms">Melayu / Malaysia</option>
+      <option value="ar">Arab / Arabic</option>
+      <option value="zh">Mandarin (Chinese)</option>
+      <option value="hi">Hindi</option>
+      <option value="ja">Japanese</option>
+      <option value="ko">Korean</option>
+      <option value="th">Thai</option>
+      <option value="vi">Vietnamese</option>
+      <option value="tl">Filipino / Tagalog</option>
+      <option value="pt">Portuguese</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="it">Italian</option>
+    </select>
+    <label>Caption editor</label>
+    <div class="row">
+      <div>
+        <label for="capColor">Warna kata aktif</label>
+        <input type="color" id="capColor" value="#ffff00">
+      </div>
+      <div>
+        <label for="capSize">Ukuran (%)</label>
+        <input type="number" id="capSize" value="100" min="70" max="150">
+      </div>
+      <div>
+        <label for="capChunk">Kata per potong</label>
+        <input type="number" id="capChunk" value="4" min="1" max="8">
+      </div>
+    </div>
+    <label>Posisi caption</label>
+    <div class="pills" id="capPosPills">
+      <div class="pill on" data-pos="bawah">Bawah</div>
+      <div class="pill" data-pos="tengah">Tengah</div>
+      <div class="pill" data-pos="atas">Atas</div>
+    </div>
+    <div class="switch-row">
+      <span>Efek glow caption</span>
+      <label class="switch">
+        <input type="checkbox" id="capGlowToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="switch-row">
+      <span>Kotak latar caption</span>
+      <label class="switch">
+        <input type="checkbox" id="capBoxToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <label>Judul klip (AI)</label>
+    <div class="pills" id="titleModePills">
+      <div class="pill on" data-tm="off">Tanpa judul</div>
+      <div class="pill" data-tm="awal">3 detik awal</div>
+      <div class="pill" data-tm="penuh">Sepanjang klip</div>
+    </div>
+    <label>Gaya judul</label>
+    <div class="pills" id="titleStylePills">
+      <div class="pill on" data-ts="bar">Bilah hitam</div>
+      <div class="pill" data-ts="teks">Teks saja</div>
+    </div>
+    <label for="wmText">Watermark teks (opsional)</label>
+    <input type="text" id="wmText" placeholder="mis. @namakamu">
+    <div class="row">
+      <div>
+        <label for="wmOpacity">Opacity (%)</label>
+        <input type="number" id="wmOpacity" value="60" min="10" max="100">
+      </div>
+      <div>
+        <label for="wmSize">Ukuran font</label>
+        <input type="number" id="wmSize" value="28" min="16" max="64">
+      </div>
+    </div>
+    <label>Posisi watermark</label>
+    <div class="pills" id="wmPosPills">
+      <div class="pill on" data-wp="kanan-bawah">Kanan bawah</div>
+      <div class="pill" data-wp="kiri-bawah">Kiri bawah</div>
+      <div class="pill" data-wp="kanan-atas">Kanan atas</div>
+      <div class="pill" data-wp="kiri-atas">Kiri atas</div>
+    </div>
+    <label for="wmImage">Watermark logo (opsional, PNG/JPEG/WebP maks 5MB)</label>
+    <input type="file" id="wmImage" accept="image/png,image/jpeg,image/webp">
+    <div class="switch-row">
+      <span>Smart Face Tracking (crop ngikutin wajah)</span>
+      <label class="switch">
+        <input type="checkbox" id="faceToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="switch-row">
+      <span>Gaming split (facecam + gameplay)</span>
+      <label class="switch">
+        <input type="checkbox" id="splitToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="splitPanel" class="hidden">
+      <label>Facecam di</label>
+      <div class="pills" id="splitFacePills">
+        <div class="pill on" data-sf="bawah">Bawah</div>
+        <div class="pill" data-sf="atas">Atas</div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="splitFaceH">Tinggi facecam (%)</label>
+          <input type="number" id="splitFaceH" value="35" min="20" max="50">
+        </div>
+        <div></div>
+      </div>
+      <div class="hint">Kotak facecam default pojok kanan bawah (x 62%, y 68%, w 36%, h 30%) dan gameplay selayar penuh. Ubah bila rekamanmu beda.</div>
+      <div class="row">
+        <div>
+          <label for="fbX">Facecam x%</label>
+          <input type="number" id="fbX" value="62" min="0" max="99">
+        </div>
+        <div>
+          <label for="fbY">Facecam y%</label>
+          <input type="number" id="fbY" value="68" min="0" max="99">
+        </div>
+        <div>
+          <label for="fbW">Facecam w%</label>
+          <input type="number" id="fbW" value="36" min="1" max="100">
+        </div>
+        <div>
+          <label for="fbH">Facecam h%</label>
+          <input type="number" id="fbH" value="30" min="1" max="100">
+        </div>
+      </div>
+    </div>
+    <label>Crop manual (opsional, % dari frame sumber — kosongkan = otomatis)</label>
+    <div class="row">
+      <div>
+        <label for="cbX">x%</label>
+        <input type="number" id="cbX" placeholder="mis. 20" min="0" max="99">
+      </div>
+      <div>
+        <label for="cbY">y%</label>
+        <input type="number" id="cbY" placeholder="mis. 0" min="0" max="99">
+      </div>
+      <div>
+        <label for="cbW">w%</label>
+        <input type="number" id="cbW" placeholder="mis. 60" min="1" max="100">
+      </div>
+      <div>
+        <label for="cbH">h%</label>
+        <input type="number" id="cbH" placeholder="mis. 100" min="1" max="100">
+      </div>
+    </div>
+    <label>Keyframe posisi crop (opsional — geser crop dari x% awal ke x% akhir selama klip)</label>
+    <div class="row">
+      <div>
+        <label for="kfX0">x% awal</label>
+        <input type="number" id="kfX0" placeholder="mis. 20" min="0" max="100">
+      </div>
+      <div>
+        <label for="kfX1">x% akhir</label>
+        <input type="number" id="kfX1" placeholder="mis. 80" min="0" max="100">
+      </div>
+    </div>
+    <label>🎯 Editor crop visual — geser kotaknya langsung di gambar, tanpa nebak angka</label>
+    <div class="crop-stage" id="cropStage">
+      <img id="cropThumb" alt="" class="hidden">
+      <div class="crop-empty" id="cropEmpty">Tempel link YouTube di atas — thumbnail video akan muncul di sini sebagai gambaran crop (pratinjau thumbnail hanya untuk YouTube; TikTok, Facebook, dan Instagram tanpa pratinjau)</div>
+      <div class="crop-box hidden" id="cropBoxA">
+        <span class="cb-tag">KOTAK</span><span class="cb-handle" id="cropHandleA"></span>
+      </div>
+      <div class="crop-box end hidden" id="cropBoxB"><span class="cb-tag">AKHIR</span></div>
+    </div>
+    <div class="crop-readout" id="cropReadout">Belum ada gambaran — tempel link YouTube dulu (pratinjau hanya untuk YouTube).</div>
+    <div class="row">
+      <button class="mini-btn" id="cropRatioBtn" type="button">Samakan rasio</button>
+      <button class="mini-btn" id="cropResetBtn" type="button">Reset (otomatis)</button>
+    </div>
+    <div class="switch-row">
+      <span>Geser selama klip (keyframe: kotak bergerak AWAL → AKHIR)</span>
+      <label class="switch"><input type="checkbox" id="kfToggle"><span class="sl"></span></label>
+    </div>
+    </details>
+    <div class="switch-row">
+      <span>Mode Campaign — metadata posting ikut aturan campaign</span>
+      <label class="switch">
+        <input type="checkbox" id="campaignToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div id="campaignPanel" class="hidden">
+      <label for="campaignRules">Aturan campaign — tempel teks, atau upload file PDF/TXT</label>
+      <textarea id="campaignRules" placeholder="Tempel aturan campaign di sini, mis. hashtag wajib #..., link wajib ..., format judul ..., kata yang dilarang ..."></textarea>
+      <div class="row" style="margin-top:8px;">
+        <div>
+          <input type="file" id="rulesFile" accept=".pdf,.txt,.md">
+        </div>
+        <div>
+          <button class="paste-btn" id="rulesUploadBtn" type="button" style="width:100%;padding:12px;">📄 Ambil teks dari file</button>
+        </div>
+      </div>
+      <div id="rulesStatus" class="hint">Aturan dipakai AI saat membuat judul, deskripsi, dan tag tiap klip. Tanpa kunci Gemini di ⚙️, metadata tidak dibuat.</div>
+    </div>
+    <button id="processBtn" type="button">PROSES</button>
+    <div class="hint">Tanpa API key Gemini, momen dipilih dari data Most Replayed.
+      Isi API key di ⚙️ Pengaturan agar AI yang memilih momen + menulis hook.
+      Mode Manual + AI butuh tombol 🔍 Deteksi momen dulu sebelum PROSES.</div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section class="card hidden" id="progressCard">
+    <div class="step-title">Proses Berjalan</div>
+    <div class="bar"><div id="progressFill"></div></div>
+    <div id="logBox"></div>
+    <div class="err hidden" id="errorBox"></div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="card hidden" id="resultCard">
+    <div class="step-title">Step 3 — Hasil Klip</div>
+    <div class="clips" id="clipsGrid"></div>
+  </section>
+
+  <footer>
+    AUTO CLIPPER &nbsp;<span class="badge">v<span id="verBadge"></span></span>
+  </footer>
+</div>
+
+<!-- MODAL PENGATURAN -->
+<div class="modal-bg hidden" id="settingsModal">
+  <div class="modal">
+    <h3>⚙️ Pengaturan</h3>
+    <label for="backendUrl">URL Backend</label>
+    <input type="url" id="backendUrl" placeholder="https://5001-agqwxpndbjpi6e7rmr4xb3raxa.instabox.tech">
+    <label for="geminiKey">API Key Gemini (opsional) — pilih momen + hook</label>
+    <input type="password" id="geminiKey" placeholder="AIza...">
+    <label for="groqKey">API Key Groq (opsional) — caption dari suara (STT)</label>
+    <input type="password" id="groqKey" placeholder="gsk_...">
+    <div class="hint">Tersimpan hanya di browser ini (localStorage), tidak dikirim
+      ke mana pun selain backend saat memproses video. Tanpa key, mode
+      Most Replayed tetap jalan. Groq dipakai hanya bila video tidak punya
+      transkrip dan caption aktif.</div>
+    <label>Tema tampilan</label>
+    <div class="pills" id="themePills">
+      <div class="pill on" data-theme="cyan">🌊 Cyan Gelap</div>
+      <div class="pill" data-theme="terang">☀️ Terang</div>
+      <div class="pill" data-theme="ungu">🔮 Ungu</div>
+      <div class="pill" data-theme="emas">👑 Emas</div>
+    </div>
+    <div class="switch-row">
+      <span>Maskot melayang</span>
+      <label class="switch">
+        <input type="checkbox" id="mascotToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <label>Karakter maskot</label>
+    <div class="pills" id="mascotPills">
+      <div class="pill on" data-char="ghost">👻 Hantu</div>
+      <div class="pill" data-char="scissors">✂️ Gunting</div>
+      <div class="pill" data-char="clapper">🎬 Clapper</div>
+      <div class="pill" data-char="star">⭐ Bintang</div>
+    </div>
+    <button class="save-btn" id="saveSettings" type="button">Simpan</button>
+  </div>
+</div>
+
+<!-- maskot melayang (v1.14) — 4 karakter, pilih di Pengaturan (v1.20) -->
+<div id="mascot" aria-hidden="true">
+  <div class="m-bob">
+  <!-- 👻 hantu — digambar ulang persis screenshot (v1.20): badan
+       lebih gemuk, mata oval tegak hitam polos (tanpa pupil),
+       mulut oval kecil -->
+  <svg data-char="ghost" viewBox="0 0 100 110" width="64" height="64">
+    <path d="M50 10 C28 10 14 30 14 52 L14 88 C14 92 19 92 22 88 C25 84 28 84 31 88 C34 92 39 92 42 88 C44 85 46 84 50 88 C54 84 56 85 58 88 C61 92 66 92 69 88 C72 84 75 84 78 88 C81 92 86 92 86 88 L86 52 C86 30 72 10 50 10 Z" fill="var(--txt)" opacity="0.92"/>
+    <ellipse cx="38" cy="48" rx="4.5" ry="7" class="m-eye" fill="var(--bg)"/>
+    <ellipse cx="62" cy="48" rx="4.5" ry="7" class="m-eye" fill="var(--bg)"/>
+    <path class="m-closed" d="M33 48 Q38 53 43 48" stroke="var(--bg)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path class="m-closed" d="M57 48 Q62 53 67 48" stroke="var(--bg)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="50" cy="64" rx="4" ry="5.5" fill="var(--bg)"/>
+  </svg>
+  <!-- ✂️ gunting — potong klip (dua sisi membuka-menutup, v1.22) -->
+  <svg data-char="scissors" class="hidden" viewBox="0 0 100 110" width="64" height="64">
+    <g class="sc-side1">
+      <line x1="34" y1="88" x2="68" y2="18" stroke="var(--txt)" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="32" cy="92" r="9" fill="none" stroke="var(--accent)" stroke-width="5"/>
+    </g>
+    <g class="sc-side2">
+      <line x1="66" y1="88" x2="32" y2="18" stroke="var(--txt)" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="68" cy="92" r="9" fill="none" stroke="var(--accent)" stroke-width="5"/>
+    </g>
+    <circle cx="50" cy="56" r="6.5" fill="var(--accent)"/>
+  </svg>
+  <!-- 🎬 clapperboard — syuting/video (flap menepuk, v1.22) -->
+  <svg data-char="clapper" class="hidden" viewBox="0 0 100 110" width="64" height="64">
+    <g class="cl-flap">
+      <rect x="14" y="16" width="72" height="16" rx="4" fill="var(--txt)"/>
+      <rect x="24" y="16" width="9" height="16" fill="var(--bg)"/>
+      <rect x="42" y="16" width="9" height="16" fill="var(--bg)"/>
+      <rect x="60" y="16" width="9" height="16" fill="var(--bg)"/>
+      <rect x="78" y="16" width="8" height="16" fill="var(--bg)"/>
+    </g>
+    <rect x="14" y="36" width="72" height="58" rx="6" fill="var(--panel2)" stroke="var(--txt)" stroke-width="3"/>
+    <path d="M44 56 L62 66 L44 78 Z" fill="var(--accent)"/>
+    <line x1="22" y1="86" x2="78" y2="86" stroke="var(--txt)" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+  </svg>
+  <!-- ⭐ bintang — viral -->
+  <svg data-char="star" class="hidden" viewBox="0 0 100 110" width="64" height="64">
+    <path d="M50 12 L62 40 L92 42 L68 60 L77 90 L50 73 L23 90 L32 60 L8 42 L38 40 Z" fill="var(--accent)"/>
+    <circle cx="42" cy="50" r="3.2" class="m-eye" fill="var(--bg)"/>
+    <circle cx="58" cy="50" r="3.2" class="m-eye" fill="var(--bg)"/>
+    <path d="M44 61 Q50 67 56 61" stroke="var(--bg)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>
+  </div>
+</div>
+<div id="sparkles" aria-hidden="true"></div>
+
+<script>
+const CLIP_VER = "1.25";
+document.getElementById("verBadge").textContent = CLIP_VER;
+
+const $ = (id) => document.getElementById(id);
+const LS_BACKEND = "autoclip_backend_url";
+const LS_KEY = "autoclip_gemini_key";
+const LS_GROQ = "autoclip_groq_key";
+const DEFAULT_BACKEND = "https://5001-agqwxpndbjpi6e7rmr4xb3raxa.instabox.tech";
+
+function backendBase() {
+  let saved = localStorage.getItem(LS_BACKEND) || "";
+  // Migrasi v1.4: backend lama (Render) diganti backend box InstaBox.
+  if (saved.replace(/\/+$/, "") === "https://auto-clipper-api.onrender.com") {
+    saved = DEFAULT_BACKEND;
+    localStorage.setItem(LS_BACKEND, saved);
+  }
+  return (saved || DEFAULT_BACKEND).replace(/\/+$/, "");
+}
+
+// ---------- pengaturan ----------
+$("settingsBtn").addEventListener("click", () => {
+  $("backendUrl").value = localStorage.getItem(LS_BACKEND) || DEFAULT_BACKEND;
+  $("geminiKey").value = localStorage.getItem(LS_KEY) || "";
+  $("groqKey").value = localStorage.getItem(LS_GROQ) || "";
+  $("settingsModal").classList.remove("hidden");
+  updateMascotWatch();
+});
+$("saveSettings").addEventListener("click", () => {
+  localStorage.setItem(LS_BACKEND, $("backendUrl").value.trim());
+  localStorage.setItem(LS_KEY, $("geminiKey").value.trim());
+  localStorage.setItem(LS_GROQ, $("groqKey").value.trim());
+  $("settingsModal").classList.add("hidden");
+  updateMascotWatch();
+});
+
+// ---------- tema tampilan (v1.13) ----------
+const LS_THEME = "autoclip_theme";
+const THEMES = ["cyan", "terang", "ungu", "emas"];
+const THEME_NAMES = { cyan: "Cyan Gelap", terang: "Terang", ungu: "Ungu", emas: "Emas" };
+function applyTheme(t) {
+  if (!THEMES.includes(t)) t = "cyan";
+  if (t === "cyan") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", t);
+  localStorage.setItem(LS_THEME, t);
+  document.querySelectorAll("#themePills .pill").forEach((p) =>
+    p.classList.toggle("on", p.dataset.theme === t));
+  const tb = $("themeBtn");
+  if (tb) tb.title = "Tema: " + THEME_NAMES[t] + " — ketuk untuk ganti";
+}
+$("themeBtn").addEventListener("click", () => {
+  const cur = localStorage.getItem(LS_THEME) || "cyan";
+  applyTheme(THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length]);
+});
+applyTheme(localStorage.getItem(LS_THEME) || "cyan");
+
+// ---------- maskot hantu melayang (v1.14) ----------
+const LS_MASCOT = "autoclip_mascot";
+function applyMascot(on) {
+  $("mascot").classList.toggle("hidden", !on);
+  localStorage.setItem(LS_MASCOT, on ? "1" : "0");
+  const t = $("mascotToggle");
+  if (t) t.checked = on;
+}
+$("mascotToggle").addEventListener("change", () =>
+  applyMascot($("mascotToggle").checked));
+applyMascot(localStorage.getItem(LS_MASCOT) !== "0");
+
+// ---------- pilih karakter maskot (v1.20) ----------
+const LS_CHAR = "autoclip_mascot_char";
+function setMascotChar(c) {
+  document.querySelectorAll("#mascot svg").forEach(s =>
+    s.classList.toggle("hidden", s.dataset.char !== c));
+  localStorage.setItem(LS_CHAR, c);
+}
+pillGroup("mascotPills", "char", setMascotChar);
+(function initMascotChar() {
+  const c = localStorage.getItem(LS_CHAR) || "ghost";
+  setMascotChar(c);
+  document.querySelectorAll("#mascotPills .pill").forEach(p =>
+    p.classList.toggle("on", p.dataset.char === c));
+})();
+
+// ---------- maskot terbang random ke 6 titik (v1.18–v1.20) ----------
+// Tiap ~4 detik pindah ke salah satu titik secara acak: 4 sudut
+// + tengah atas + tengah bawah. Terbangnya mulus (transition
+// left/top). Berhenti pas lagi "liatin".
+function mascotSpot() {
+  const pad = 12, w = 72, h = 78;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const spots = [
+    { x: pad, y: pad },
+    { x: (vw - w) / 2, y: pad },
+    { x: vw - w - pad, y: pad },
+    { x: pad, y: vh - h - pad },
+    { x: (vw - w) / 2, y: vh - h - pad },
+    { x: vw - w - pad, y: vh - h - pad },
+  ];
+  return spots[Math.floor(Math.random() * spots.length)];
+}
+function flyMascot() {
+  const m = $("mascot");
+  if (!m || m.classList.contains("hidden") ||
+      m.classList.contains("watching")) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const r = m.getBoundingClientRect();
+  const s = mascotSpot();
+  // percikan: ledakan kecil di titik berangkat + kilau di titik tujuan
+  spawnSparkles(r.left + r.width / 2, r.top + r.height / 2, 5);
+  spawnSparkles(s.x + 36, s.y + 39, 3);
+  m.style.left = s.x + "px";
+  m.style.top = s.y + "px";
+  m.style.right = "auto";
+  m.style.bottom = "auto";
+  // v1.22: percikan NGIKUT selama pergeseran — jejak bintang
+  // di posisi maskot tiap 150 mdtk sampai dia sampai (~2,4 dtk)
+  // v1.23: 2 percikan per langkah + ukuran lebih besar biar
+  // jejaknya jelas kelihatan
+  if (trailTimer) clearInterval(trailTimer);
+  let ticks = 0;
+  trailTimer = setInterval(() => {
+    const rr = m.getBoundingClientRect();
+    spawnSparkles(rr.left + rr.width / 2, rr.top + rr.height / 2, 2);
+    if (++ticks >= 16) { clearInterval(trailTimer); trailTimer = null; }
+  }, 150);
+}
+let trailTimer = null;
+
+// ---------- percikan bintang saat pindah tempat (v1.21) ----------
+function spawnSparkles(x, y, n) {
+  const box = $("sparkles");
+  if (!box) return;
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement("span");
+    s.className = "spark";
+    s.textContent = "✦";
+    s.style.left = (x + (Math.random() - 0.5) * 56) + "px";
+    s.style.top = (y + (Math.random() - 0.5) * 56) + "px";
+    s.style.fontSize = (10 + Math.random() * 8) + "px";
+    s.style.animationDelay = (Math.random() * 0.15) + "s";
+    s.style.animationDuration = (0.9 + Math.random() * 0.4) + "s";
+    box.appendChild(s);
+    setTimeout(() => s.remove(), 1300);
+  }
+}
+(function initMascotFlight() {
+  const m = $("mascot");
+  m.style.left = (window.innerWidth - 72 - 12) + "px";
+  m.style.top = (window.innerHeight - 78 - 12) + "px";
+  m.style.right = "auto";
+  m.style.bottom = "auto";
+  setInterval(() => { if (!document.hidden) flyMascot(); }, 4200);
+})();
+
+// ---------- hantu "liatin" (v1.16) ----------
+// Pas mode Manual/Manual+AI aktif atau modal Pengaturan dibuka,
+// hantu berhenti muter & jalan-jalan, matanya menengok ke atas.
+function updateMascotWatch() {
+  const watching = (selMode !== "auto") ||
+    !$("settingsModal").classList.contains("hidden") ||
+    document.activeElement === $("urlInput");
+  const m = $("mascot");
+  if (watching && !m.classList.contains("hidden")) {
+    // v1.23: BEKUKAN di tempat seketika — hentikan transisi
+    // terbang di posisi saat ini, jangan selesaikan dulu
+    const r = m.getBoundingClientRect();
+    m.style.transition = "none";
+    m.style.left = r.left + "px";
+    m.style.top = r.top + "px";
+    void m.offsetWidth;
+    m.style.transition = "";
+  }
+  m.classList.toggle("watching", watching);
+}
+$("urlInput").addEventListener("focus", updateMascotWatch);
+$("urlInput").addEventListener("blur", updateMascotWatch);
+$("settingsModal").addEventListener("click", (e) => {
+  if (e.target === $("settingsModal")) {
+    $("settingsModal").classList.add("hidden");
+    updateMascotWatch();
+  }
+});
+
+// ---------- tempel ----------
+$("pasteBtn").addEventListener("click", async () => {
+  try {
+    const t = await navigator.clipboard.readText();
+    if (t) { $("urlInput").value = t.trim(); updateCropThumb(); }
+  } catch (e) { /* izin clipboard ditolak; abaikan */ }
+});
+
+// ---------- pil rasio & resolusi ----------
+function pillGroup(id, attr, cb) {
+  const box = $(id);
+  box.querySelectorAll(".pill").forEach((p) => {
+    p.addEventListener("click", () => {
+      box.querySelectorAll(".pill").forEach((x) => x.classList.remove("on"));
+      p.classList.add("on");
+      cb(p.dataset[attr]);
+    });
+  });
+}
+let selRatio = "9:16", selHeight = 720, selCaptionStyle = "pop";
+let selMode = "auto", selCapPos = "bawah", selTitleMode = "off",
+    selTitleStyle = "bar", selWmPos = "kanan-bawah", selSplitFace = "bawah";
+let manualClips = [], detected = [];
+pillGroup("ratioPills", "ratio", (v) => { selRatio = v; });
+pillGroup("heightPills", "height", (v) => { selHeight = parseInt(v, 10); });
+pillGroup("modePills", "mode", (v) => {
+  selMode = v;
+  $("manualPanel").classList.toggle("hidden", v !== "manual");
+  $("detectPanel").classList.toggle("hidden", v !== "manual_ai");
+  updateMascotWatch();
+});
+pillGroup("capPosPills", "pos", (v) => { selCapPos = v; });
+pillGroup("titleModePills", "tm", (v) => { selTitleMode = v; });
+pillGroup("titleStylePills", "ts", (v) => { selTitleStyle = v; });
+pillGroup("wmPosPills", "wp", (v) => { selWmPos = v; });
+pillGroup("splitFacePills", "sf", (v) => { selSplitFace = v; });
+pillGroup("themePills", "theme", (v) => applyTheme(v));
+$("splitToggle").addEventListener("change", () => {
+  $("splitPanel").classList.toggle("hidden", !$("splitToggle").checked);
+});
+
+// ---------- sumber video: link / upload file (v1.12) ----------
+let selSource = "url";
+let uploadedFile = null; // {fileId, filename, size, duration}
+function getSource() {
+  if (selSource === "file") {
+    if (!uploadedFile) return { error: "Upload dulu file videonya." };
+    return { source: { type: "file", fileId: uploadedFile.fileId }, url: "" };
+  }
+  const url = $("urlInput").value.trim();
+  if (!url) return { error: "Tempel dulu link videonya." };
+  return { source: { type: "url", url: url }, url: url };
+}
+pillGroup("sourcePills", "source", (v) => {
+  selSource = v;
+  $("urlPanel").classList.toggle("hidden", v !== "url");
+  $("filePanel").classList.toggle("hidden", v !== "file");
+});
+$("videoFile").addEventListener("change", async () => {
+  const f = $("videoFile").files[0];
+  if (!f) return;
+  if (f.size > 1024 * 1024 * 1024) {
+    alert("Video maks 1 GB.");
+    $("videoFile").value = "";
+    return;
+  }
+  $("uploadChip").textContent = "⏳ Mengunggah " + f.name + "…";
+  const fd = new FormData();
+  fd.append("kind", "video");
+  fd.append("file", f);
+  try {
+    const res = await fetch(backendBase() + "/api/upload", {
+      method: "POST", body: fd,
+    });
+    const data = await res.json();
+    if (!res.ok || !data.fileId) throw new Error(data.error || "Upload gagal.");
+    uploadedFile = data;
+    const chip = document.createElement("div");
+    chip.className = "file-chip";
+    const info = document.createElement("span");
+    const dur = data.duration ? (" • " + Math.round(data.duration) + " dtk") : "";
+    info.textContent = "📁 " + data.filename + " (" +
+      (data.size / 1048576).toFixed(1) + " MB" + dur + ")";
+    const x = document.createElement("button");
+    x.type = "button"; x.className = "meta-copy"; x.textContent = "✕ Hapus";
+    x.addEventListener("click", () => {
+      uploadedFile = null;
+      $("videoFile").value = "";
+      $("uploadChip").textContent = "";
+    });
+    chip.append(info, x);
+    $("uploadChip").textContent = "";
+    $("uploadChip").appendChild(chip);
+  } catch (e) {
+    $("uploadChip").textContent = "❌ Upload gagal: " + e.message;
+  }
+});
+
+// ---------- mode Campaign (v1.12) ----------
+$("campaignToggle").addEventListener("change", () => {
+  $("campaignPanel").classList.toggle("hidden", !$("campaignToggle").checked);
+});
+$("rulesUploadBtn").addEventListener("click", async () => {
+  const f = $("rulesFile").files[0];
+  if (!f) { alert("Pilih dulu file PDF/TXT aturan campaign."); return; }
+  $("rulesStatus").textContent = "⏳ Membaca file aturan…";
+  const fd = new FormData();
+  fd.append("kind", "rules");
+  fd.append("file", f);
+  try {
+    const res = await fetch(backendBase() + "/api/upload", {
+      method: "POST", body: fd,
+    });
+    const data = await res.json();
+    if (!res.ok || !data.text) throw new Error(data.error || "Gagal membaca file.");
+    $("campaignRules").value = data.text;
+    $("rulesStatus").textContent = "✅ Teks aturan terisi (" + data.text.length +
+      " karakter). Cek dan edit bila perlu sebelum proses.";
+  } catch (e) {
+    $("rulesStatus").textContent = "❌ " + e.message;
+  }
+});
+
+// ---------- klip manual ----------
+function renderManualList() {
+  const box = $("manualList");
+  if (!manualClips.length) { box.textContent = "Belum ada klip manual."; return; }
+  box.innerHTML = "";
+  manualClips.forEach((c, i) => {
+    const d = document.createElement("div");
+    d.textContent = (i + 1) + ". " + fmtTime(c.start) + " – " + fmtTime(c.end) + "  ";
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = "✕"; b.className = "paste-btn";
+    b.style.padding = "2px 10px";
+    b.addEventListener("click", () => { manualClips.splice(i, 1); renderManualList(); });
+    d.appendChild(b);
+    box.appendChild(d);
+  });
+}
+$("addClipBtn").addEventListener("click", () => {
+  const s = parseFloat($("manStart").value), e = parseFloat($("manEnd").value);
+  if (isNaN(s) || isNaN(e) || e - s < 3) {
+    alert("Isi mulai & selesai, minimal 3 detik."); return;
+  }
+  manualClips.push({ start: s, end: e });
+  renderManualList();
+});
+
+// ---------- deteksi momen (Manual + AI) ----------
+function escHtml(t) {
+  return String(t == null ? "" : t).replace(/[&<>"']/g, (m) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+}
+function renderDetectList() {
+  const box = $("detectList");
+  box.innerHTML = "";
+  if (!detected.length) {
+    box.innerHTML = '<div class="hint">Tidak ada momen terdeteksi.</div>';
+    return;
+  }
+  detected.forEach((c, i) => {
+    const d = document.createElement("div");
+    d.className = "det-card";
+    d.innerHTML = '<label><input type="checkbox" class="det-chk" data-i="' + i + '" checked> ' +
+      fmtTime(c.start) + " – " + fmtTime(c.end) + " &nbsp;•&nbsp; Skor " + c.score + "</label>" +
+      '<div class="hint">' + (c.title ? "<b>" + escHtml(c.title) + "</b><br>" : "") +
+      escHtml(c.hook || "") + (c.desc ? "<br>" + escHtml(c.desc) : "") + "</div>";
+    box.appendChild(d);
+  });
+}
+$("detectBtn").addEventListener("click", async () => {
+  const src = getSource();
+  if (src.error) { alert(src.error); return; }
+  const url = src.url;
+  const btn = $("detectBtn");
+  btn.disabled = true; btn.textContent = "🔍 Mendeteksi…";
+  try {
+    const res = await fetch(backendBase() + "/api/detect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: url,
+        source: src.source,
+        geminiKey: localStorage.getItem(LS_KEY) || "",
+        groqKey: localStorage.getItem(LS_GROQ) || "",
+        settings: baseSettings()
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.candidates) throw new Error(data.error || "Deteksi gagal.");
+    detected = data.candidates;
+    renderDetectList();
+  } catch (e) {
+    alert("Deteksi gagal: " + e.message);
+  }
+  btn.disabled = false; btn.textContent = "🔍 Deteksi momen";
+});
+
+// ---------- editor crop visual ----------
+const cropStage = $("cropStage"), cropThumb = $("cropThumb"),
+      cropEmpty = $("cropEmpty"), cropBoxA = $("cropBoxA"),
+      cropBoxB = $("cropBoxB"), cropReadout = $("cropReadout");
+let crop = { x: 34, y: 0, w: 32, h: 100, x1: 68, key: false };
+let cropHasId = false;
+
+function ytIdFromUrl(u) {
+  const m = String(u || "").match(/(?:v=|youtu\.be\/|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function ratioDims() {
+  if (selRatio === "1:1") return { w: 56.25, h: 100 };
+  if (selRatio === "16:9") return { w: 100, h: 100 };
+  return { w: 31.64, h: 100 }; // 9:16 & 9:16-blur
+}
+function clampCrop() {
+  crop.w = Math.min(100, Math.max(5, crop.w));
+  crop.h = Math.min(100, Math.max(5, crop.h));
+  crop.x = Math.min(100 - crop.w, Math.max(0, crop.x));
+  crop.y = Math.min(100 - crop.h, Math.max(0, crop.y));
+  crop.x1 = Math.min(100 - crop.w, Math.max(0, crop.x1));
+}
+function renderCropBoxes() {
+  clampCrop();
+  const set = (el, x, y) => {
+    el.style.left = x + "%"; el.style.top = y + "%";
+    el.style.width = crop.w + "%"; el.style.height = crop.h + "%";
+  };
+  set(cropBoxA, crop.x, crop.y);
+  set(cropBoxB, crop.x1, crop.y);
+  cropBoxA.classList.toggle("hidden", !cropHasId);
+  cropBoxB.classList.toggle("hidden", !cropHasId || !crop.key);
+  cropBoxA.querySelector(".cb-tag").textContent = crop.key ? "AWAL" : "KOTAK";
+  if (!cropHasId) {
+    cropReadout.textContent = "Belum ada gambaran — tempel link YouTube dulu (pratinjau hanya untuk YouTube).";
+  } else if (crop.key) {
+    cropReadout.innerHTML = "Kotak: x=<b>" + crop.x.toFixed(1) + "%</b> y=<b>" + crop.y.toFixed(1) + "%</b> w=<b>" + crop.w.toFixed(1) + "%</b> h=<b>" + crop.h.toFixed(1) + "%</b> · geser <b>" + crop.x.toFixed(1) + "% → " + crop.x1.toFixed(1) + "%</b>";
+  } else {
+    cropReadout.innerHTML = "Kotak: x=<b>" + crop.x.toFixed(1) + "%</b> y=<b>" + crop.y.toFixed(1) + "%</b> w=<b>" + crop.w.toFixed(1) + "%</b> h=<b>" + crop.h.toFixed(1) + "%</b> · geser kotak untuk mengaktifkan crop manual.";
+  }
+}
+function writeCropInputs() {
+  $("cbX").value = crop.x.toFixed(1); $("cbY").value = crop.y.toFixed(1);
+  $("cbW").value = crop.w.toFixed(1); $("cbH").value = crop.h.toFixed(1);
+  if (crop.key) {
+    $("kfX0").value = crop.x.toFixed(1); $("kfX1").value = crop.x1.toFixed(1);
+  } else {
+    $("kfX0").value = ""; $("kfX1").value = "";
+  }
+}
+function readCropInputs() {
+  const v = ["cbX", "cbY", "cbW", "cbH"].map((id) => $(id).value.trim());
+  if (v.every((x) => x !== "")) {
+    crop.x = parseFloat(v[0]); crop.y = parseFloat(v[1]);
+    crop.w = parseFloat(v[2]); crop.h = parseFloat(v[3]);
+  }
+  const k0 = $("kfX0").value.trim(), k1 = $("kfX1").value.trim();
+  crop.key = (k0 !== "" && k1 !== "");
+  $("kfToggle").checked = crop.key;
+  if (crop.key) crop.x1 = parseFloat(k1);
+  renderCropBoxes();
+}
+function updateCropThumb() {
+  const id = ytIdFromUrl($("urlInput").value);
+  if (!id) {
+    cropHasId = false; cropThumb.classList.add("hidden");
+    cropEmpty.textContent = "Tempel link YouTube di atas — thumbnail video akan muncul di sini sebagai gambaran crop (pratinjau thumbnail hanya untuk YouTube; TikTok, Facebook, dan Instagram tanpa pratinjau)";
+    cropEmpty.classList.remove("hidden"); renderCropBoxes(); return;
+  }
+  cropHasId = true;
+  // PENTING: jangan pakai maxresdefault/sddefault. Bila ukuran itu tak ada,
+  // YouTube membalas 404 TAPI badannya gambar abu-abu valid — browser
+  // menganggapnya berhasil dimuat sehingga fallback tak pernah jalan
+  // (terbukti: gambar 404 itu sendiri yang tampil di pratinjau v1.7–v1.8).
+  // hqdefault selalu ada untuk video publik; mqdefault cadangan terakhir.
+  cropEmpty.classList.add("hidden"); cropThumb.classList.remove("hidden");
+  cropThumb.onerror = () => {
+    if (cropThumb.src.includes("hqdefault")) {
+      cropThumb.src = "https://i.ytimg.com/vi/" + id + "/mqdefault.jpg";
+    } else {
+      cropThumb.classList.add("hidden");
+      cropEmpty.textContent = "Thumbnail gagal dimuat (jaringan mungkin memblokir pratinjau) — kotak tetap bisa digeser di atas latar ini.";
+      cropEmpty.classList.remove("hidden");
+    }
+  };
+  cropThumb.src = "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg";
+  renderCropBoxes();
+}
+function dragCrop(el, onMove, cornerResize) {
+  el.addEventListener("pointerdown", (e) => {
+    e.preventDefault(); e.stopPropagation();
+    el.setPointerCapture(e.pointerId);
+    const r = cropStage.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY, snap = { ...crop };
+    let mode = "move";
+    if (cornerResize) {
+      const rx = (e.clientX - r.left) / r.width, ry = (e.clientY - r.top) / r.height;
+      if (rx > 0.85 && ry > 0.85) mode = "resize";
+    }
+    const mv = (ev) => {
+      onMove(snap, (ev.clientX - sx) / r.width * 100, (ev.clientY - sy) / r.height * 100, mode);
+      clampCrop(); writeCropInputs(); renderCropBoxes();
+    };
+    const up = () => {
+      el.removeEventListener("pointermove", mv);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+    };
+    el.addEventListener("pointermove", mv);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+  });
+}
+dragCrop(cropBoxA, (s, dx, dy, mode) => {
+  if (mode === "resize") { crop.w = s.w + dx; crop.h = s.h + dy; }
+  else { crop.x = s.x + dx; crop.y = s.y + dy; }
+}, true);
+dragCrop(cropBoxB, (s, dx) => {
+  crop.x1 = s.x1 + dx;
+});
+dragCrop($("cropHandleA"), (s, dx, dy) => {
+  crop.w = s.w + dx; crop.h = s.h + dy;
+});
+$("urlInput").addEventListener("input", updateCropThumb);
+$("urlInput").addEventListener("change", updateCropThumb);
+$("urlInput").addEventListener("paste", () => setTimeout(updateCropThumb, 0));
+["cbX", "cbY", "cbW", "cbH", "kfX0", "kfX1"].forEach((id) => {
+  $(id).addEventListener("input", readCropInputs);
+});
+$("cropRatioBtn").addEventListener("click", () => {
+  const d = ratioDims();
+  const delta = crop.x1 - crop.x; // kunci jarak AWAL→AKHIR supaya tak runtuh
+  crop.w = d.w; crop.h = d.h; crop.y = 0; crop.x = (100 - d.w) / 2;
+  if (crop.key) crop.x1 = crop.x + delta;
+  clampCrop(); writeCropInputs(); renderCropBoxes();
+});
+$("cropResetBtn").addEventListener("click", () => {
+  ["cbX", "cbY", "cbW", "cbH", "kfX0", "kfX1"].forEach((id) => { $(id).value = ""; });
+  crop.key = false; $("kfToggle").checked = false;
+  const d = ratioDims();
+  crop.w = d.w; crop.h = d.h; crop.y = 0; crop.x = (100 - d.w) / 2; crop.x1 = crop.x;
+  renderCropBoxes();
+});
+$("kfToggle").addEventListener("change", () => {
+  crop.key = $("kfToggle").checked;
+  if (crop.key) crop.x1 = Math.min(100 - crop.w, crop.x + 40);
+  writeCropInputs(); renderCropBoxes();
+});
+(function () {
+  const d = ratioDims();
+  crop.w = d.w; crop.h = d.h; crop.y = 0;
+  crop.x = (100 - d.w) / 2; crop.x1 = crop.x;
+  renderCropBoxes();
+  updateCropThumb(); // kalau kolom link sudah terisi (autofill/kembali ke halaman)
+})();
+
+// ---------- rakit settings ----------
+function baseSettings() {
+  const cbVals = ["cbX", "cbY", "cbW", "cbH"].map((id) => $(id).value.trim());
+  let cropBox = null;
+  if (cbVals.every((v) => v !== "")) {
+    cropBox = { x: parseFloat(cbVals[0]), y: parseFloat(cbVals[1]),
+                w: parseFloat(cbVals[2]), h: parseFloat(cbVals[3]) };
+  }
+  let keyframes = [];
+  const kx0 = $("kfX0").value.trim(), kx1 = $("kfX1").value.trim();
+  if (kx0 !== "" && kx1 !== "") {
+    // t akhir besar = geser merata sepanjang klip
+    keyframes = [{ t: 0, x: parseFloat(kx0) }, { t: 9999, x: parseFloat(kx1) }];
+  }
+  return {
+    clipCount: parseInt($("clipCount").value, 10) || 5,
+    minDur: parseInt($("minDur").value, 10) || 15,
+    maxDur: parseInt($("maxDur").value, 10) || 30,
+    ratio: selRatio,
+    height: selHeight,
+    audience: $("audience").value.trim(),
+    teaser: $("teaserToggle").checked,
+    teaserSeconds: parseInt($("teaserSeconds").value, 10) || 3,
+    onlyHighScore: $("highToggle").checked,
+    captions: $("captionToggle").checked,
+    captionStyle: selCaptionStyle,
+    mode: selMode,
+    campaignMode: $("campaignToggle").checked,
+    campaignRules: $("campaignRules").value.trim(),
+    sttLang: $("langSelect").value,
+    capColor: $("capColor").value,
+    capSizePct: parseInt($("capSize").value, 10) || 100,
+    capChunk: parseInt($("capChunk").value, 10) || 4,
+    capPos: selCapPos,
+    capGlow: $("capGlowToggle").checked,
+    capBox: $("capBoxToggle").checked,
+    titleMode: selTitleMode,
+    titleStyle: selTitleStyle,
+    watermarkText: $("wmText").value.trim(),
+    watermarkPos: selWmPos,
+    watermarkOpacity: parseInt($("wmOpacity").value, 10) || 60,
+    watermarkSize: parseInt($("wmSize").value, 10) || 28,
+    faceTrack: $("faceToggle").checked,
+    splitMode: $("splitToggle").checked,
+    splitFace: selSplitFace,
+    splitFaceH: parseInt($("splitFaceH").value, 10) || 35,
+    splitFaceBox: { x: parseFloat($("fbX").value) || 62,
+                    y: parseFloat($("fbY").value) || 68,
+                    w: parseFloat($("fbW").value) || 36,
+                    h: parseFloat($("fbH").value) || 30 },
+    splitGameBox: { x: 0, y: 0, w: 100, h: 100 },
+    cropBox: cropBox,
+    keyframes: keyframes
+  };
+}
+document.querySelectorAll("#captionTplGrid .tpl-card").forEach((card) => {
+  card.addEventListener("click", () => {
+    document.querySelectorAll("#captionTplGrid .tpl-card")
+      .forEach((x) => x.classList.remove("on"));
+    card.classList.add("on");
+    selCaptionStyle = card.dataset.cstyle;
+  });
+});
+
+// ---------- proses ----------
+let polling = null;
+
+function fmtTime(sec) {
+  sec = Math.round(sec);
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return m + ":" + String(s).padStart(2, "0");
+}
+
+function setBusy(busy) {
+  $("processBtn").disabled = busy;
+  $("processBtn").textContent = busy ? "MEMPROSES…" : "PROSES";
+}
+
+async function startJob() {
+  const src = getSource();
+  if (src.error) { alert(src.error); return; }
+  if ($("campaignToggle").checked && !$("campaignRules").value.trim()) {
+    alert("Mode Campaign aktif tapi aturan masih kosong — isi dulu aturannya (teks atau PDF), atau matikan modenya.");
+    return;
+  }
+  const url = src.url;
+  const settings = baseSettings();
+  if (selMode === "manual") {
+    if (!manualClips.length) { alert("Tambah dulu minimal 1 klip manual."); return; }
+    settings.clips = manualClips;
+  } else if (selMode === "manual_ai") {
+    const picked = [];
+    document.querySelectorAll(".det-chk:checked").forEach((ch) => {
+      picked.push(detected[parseInt(ch.dataset.i, 10)]);
+    });
+    if (!picked.length) {
+      alert("Deteksi dulu, lalu centang klip yang mau di-render."); return;
+    }
+    settings.clips = picked;
+  }
+  let wmImage = "";
+  const wmFile = $("wmImage").files[0];
+  if (wmFile) {
+    if (wmFile.size > 5 * 1024 * 1024) { alert("Logo watermark maks 5MB."); return; }
+    wmImage = await new Promise((resolve) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => resolve("");
+      r.readAsDataURL(wmFile);
+    });
+  }
+  $("progressCard").classList.remove("hidden");
+  $("resultCard").classList.add("hidden");
+  $("errorBox").classList.add("hidden");
+  $("logBox").textContent = "";
+  $("progressFill").style.width = "0%";
+  setBusy(true);
+
+  let jobId;
+  try {
+    const res = await fetch(backendBase() + "/api/job", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: url,
+        source: src.source,
+        geminiKey: localStorage.getItem(LS_KEY) || "",
+        groqKey: localStorage.getItem(LS_GROQ) || "",
+        settings: settings,
+        watermarkImage: wmImage
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.jobId) throw new Error(data.error || "Gagal membuat job.");
+    jobId = data.jobId;
+  } catch (e) {
+    showError("Tidak bisa menghubungi backend: " + e.message);
+    setBusy(false);
+    return;
+  }
+  poll(jobId);
+}
+
+function poll(jobId) {
+  if (polling) clearInterval(polling);
+  polling = setInterval(async () => {
+    try {
+      const res = await fetch(backendBase() + "/api/job/" + jobId);
+      const data = await res.json();
+      $("progressFill").style.width = (data.progress || 0) + "%";
+      $("logBox").textContent = (data.log || []).join("\n");
+      $("logBox").scrollTop = $("logBox").scrollHeight;
+      if (data.status === "done") {
+        clearInterval(polling); polling = null;
+        setBusy(false);
+        renderClips(data.clips || []);
+      } else if (data.status === "error") {
+        clearInterval(polling); polling = null;
+        setBusy(false);
+        showError(data.error || "Terjadi kesalahan.");
+      }
+    } catch (e) { /* abaikan gangguan jaringan sesaat */ }
+  }, 3000);
+}
+
+function showError(msg) {
+  const box = $("errorBox");
+  box.textContent = "⚠️ " + msg;
+  box.classList.remove("hidden");
+}
+
+function renderClips(clips) {
+  const grid = $("clipsGrid");
+  grid.innerHTML = "";
+  if (!clips.length) {
+    grid.innerHTML = '<div class="err">Tidak ada klip yang dihasilkan.</div>';
+  }
+  clips.forEach((c) => {
+    const full = backendBase() + c.url;
+    const card = document.createElement("div");
+    card.className = "clip-card";
+    card.innerHTML =
+      '<video controls preload="metadata" src="' + full + '"></video>' +
+      '<div class="clip-body">' +
+        '<div class="clip-title"></div>' +
+        '<div class="clip-hook"></div>' +
+        '<div class="clip-meta">⏱ ' + fmtTime(c.start) + " – " + fmtTime(c.end) +
+          " &nbsp;•&nbsp; Skor " + c.score + "</div>" +
+        '<div class="clip-desc"></div>' +
+        '<a class="dl-btn" href="' + full + '" download="' + c.file + '">⬇ Unduh</a>' +
+        '<button type="button" class="copy-btn">📋 Salin judul + hook + deskripsi</button>' +
+        '<div class="meta-block hidden"></div>' +
+      "</div>";
+    card.querySelector(".clip-hook").textContent = c.hook || "";
+    card.querySelector(".clip-title").textContent = c.title || "";
+    card.querySelector(".clip-desc").textContent = c.desc || "";
+    if (!c.title) card.querySelector(".clip-title").style.display = "none";
+    if (!c.desc) card.querySelector(".clip-desc").style.display = "none";
+    card.querySelector(".copy-btn").addEventListener("click", async () => {
+      const txt = [c.title, c.hook, c.desc].filter(Boolean).join("\n");
+      try { await navigator.clipboard.writeText(txt); alert("Tersalin."); }
+      catch (e) { alert(txt); }
+    });
+    // --- v1.12: metadata posting per klip (campaign / standar) ---
+    const meta = c.meta || {};
+    const mb = card.querySelector(".meta-block");
+    if (meta.title_yt || meta.title_short || meta.description || meta.tags) {
+      mb.classList.remove("hidden");
+      const fields = [
+        ["Judul (YouTube)", meta.title_yt],
+        ["Judul Singkat (TikTok/IG/FB)", meta.title_short],
+        ["Deskripsi", meta.description],
+        ["Tag (pisahkan dengan koma)", meta.tags],
+      ];
+      fields.forEach(([label, val]) => {
+        if (!val) return;
+        const f = document.createElement("div");
+        f.className = "meta-field";
+        const l = document.createElement("div");
+        l.className = "meta-label"; l.textContent = label;
+        const v = document.createElement("div");
+        v.className = "meta-value"; v.textContent = val;
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "meta-copy"; b.textContent = "📋 Salin";
+        b.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(val);
+            b.textContent = "✅ Tersalin";
+            setTimeout(() => { b.textContent = "📋 Salin"; }, 1500);
+          } catch (e) { alert(val); }
+        });
+        f.append(l, v, b);
+        mb.appendChild(f);
+      });
+      const allBtn = document.createElement("button");
+      allBtn.type = "button"; allBtn.className = "copy-btn";
+      allBtn.textContent = "📋 Salin semua metadata";
+      allBtn.addEventListener("click", async () => {
+        const txt = [
+          "Judul (YouTube)", meta.title_yt || "", "",
+          "Judul Singkat (TikTok/IG/FB)", meta.title_short || "", "",
+          "Deskripsi", meta.description || "", "",
+          "Tag", meta.tags || "",
+        ].join("\n");
+        try { await navigator.clipboard.writeText(txt); alert("Metadata tersalin."); }
+        catch (e) { alert(txt); }
+      });
+      mb.appendChild(allBtn);
+    }
+    grid.appendChild(card);
+  });
+  $("resultCard").classList.remove("hidden");
+  $("resultCard").scrollIntoView({ behavior: "smooth" });
+}
+
+$("processBtn").addEventListener("click", startJob);
+</script>
+</body>
+</html>
